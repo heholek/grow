@@ -282,11 +282,11 @@ workflows:
         requires:
         - init
     - release-package-linux:
-        <<: *filter_only_tags
+        # <<: *filter_only_tags
         requires:
         - test
     - release-package-osx:
-        <<: *filter_only_tags
+        # <<: *filter_only_tags
         requires:
         - test-osx
     - release-package-pypi:

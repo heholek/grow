@@ -115,6 +115,10 @@ class Locale(babel.Locale):
     def alias(self, alias):
         self._alias = alias
 
+    @property
+    def alias_or_locale(self):
+        return self.alias or str(self)
+
 
 # NOTE: Babel does not support "fuzzy" locales. A locale is considered "fuzzy"
 # when a corresponding "localedata" file that matches a given locale's full

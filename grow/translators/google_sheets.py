@@ -424,19 +424,11 @@ class GoogleSheetsTranslator(base.Translator):
                 if existing_range['filterViewId'] == filter_view['filterViewId']:
                     is_filtered = True
                     requests.append({
-                        'updateFilterView': {
-                            'filter': filter_view,
-                            'fields': 'range,title,criteria',
+                        'deleteFilterView': {
+                            'filterId': filter_view['filterViewId'],
                         },
                     })
                     break
-
-        if not is_filtered:
-            requests.append({
-                'addFilterView': {
-                    'filter': filter_view,
-                },
-            })
 
         return requests
 

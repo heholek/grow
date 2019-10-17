@@ -421,14 +421,11 @@ class GoogleSheetsTranslator(base.Translator):
         is_filtered = False
         if sheet and 'filterViews' in sheet:
             for existing_range in sheet['filterViews']:
-                if existing_range['filterViewId'] == filter_view['filterViewId']:
-                    is_filtered = True
-                    requests.append({
-                        'deleteFilterView': {
-                            'filterId': filter_view['filterViewId'],
-                        },
-                    })
-                    break
+                requests.append({
+                    'deleteFilterView': {
+                        'filterId': existing_range['filterViewId'],
+                    },
+                })
 
         return requests
 
@@ -460,122 +457,122 @@ class GoogleSheetsTranslator(base.Translator):
 
         requests = []
 
-        # TODO Figure out how to be smarter about matching conditional formatting.
-        # Remove all existing conditional formatting. :(
-        if sheet and 'conditionalFormats' in sheet:
-            for _ in sheet['conditionalFormats']:
-                requests.append({
-                    'deleteConditionalFormatRule': {
-                        'sheetId': sheet_id,
-                        'index': 0
-                    }
-                })
-
-        # Style header cells.
-        requests.append({
-            'repeatCell': {
-                'fields': 'userEnteredFormat',
-                'range': {
-                    'sheetId': sheet_id,
-                    'startColumnIndex': 0,
-                    'startRowIndex': 0,
-                    'endRowIndex': self.HEADER_ROW_COUNT,
-                },
-                'cell': {
-                    'userEnteredFormat': formats['header_cell'],
-                },
-            },
-        })
-
-        # Allow the translations and comments to wrap.
-        requests.append({
-            'repeatCell': {
-                'fields': 'userEnteredFormat',
-                'range': {
-                    'sheetId': sheet_id,
-                    'startColumnIndex': 0,
-                    'endColumnIndex': 3,
-                    'startRowIndex': self.HEADER_ROW_COUNT,
-                },
-                'cell': {
-                    'userEnteredFormat': formats['wrap'],
-                },
-            },
-        })
-
-        # Comment and source cells are muted in styling.
-        requests.append({
-            'repeatCell': {
-                'fields': 'userEnteredFormat',
-                'range': {
-                    'sheetId': sheet_id,
-                    'startColumnIndex': 2,
-                    'endColumnIndex': 4,
-                    'startRowIndex': self.HEADER_ROW_COUNT,
-                },
-                'cell': {
-                    'userEnteredFormat': formats['info_cell'],
-                },
-            },
-        })
-
-        # Highlight missing translations.
-        requests.append({
-            'addConditionalFormatRule': {
-                'rule': {
-                    'ranges': [{
-                        'sheetId': sheet_id,
-                        'startColumnIndex': 1,
-                        'endColumnIndex': 2,
-                        'startRowIndex': self.HEADER_ROW_COUNT,
-                    }],
-                    'booleanRule': {
-                        'condition': {'type': 'BLANK'},
-                        'format': formats['missing_cell']
-                    }
-                },
-                'index': 0
-            }
-        })
-
-        # Protect the original values.
-        requests += self._generate_style_protected_requests(sheet_id, sheet, {
-            'protectedRangeId': sheet_id + 1000001,  # Keep it predictble.
-            'range': {
-                'sheetId': sheet_id,
-                'startColumnIndex': 0,
-                'endColumnIndex': 1,
-                'startRowIndex': self.HEADER_ROW_COUNT,
-            },
-            'description': 'Original strings can only be edited in the source files.',
-            'warningOnly': True,
-        })
-
-        # Protect the comment values.
-        requests += self._generate_style_protected_requests(sheet_id, sheet, {
-            'protectedRangeId': sheet_id + 1000002,  # Keep it predictble.
-            'range': {
-                'sheetId': sheet_id,
-                'startColumnIndex': 2,
-                'endColumnIndex': 3,
-                'startRowIndex': self.HEADER_ROW_COUNT,
-            },
-            'description': 'Comment strings can only be edited in the source files.',
-            'warningOnly': True,
-        })
-
-        # Protect the location values.
-        requests += self._generate_style_protected_requests(sheet_id, sheet, {
-            'protectedRangeId': sheet_id + 1000003,  # Keep it predictble.
-            'range': {
-                'sheetId': sheet_id,
-                'startColumnIndex': 3,
-                'endColumnIndex': 4,
-                'startRowIndex': self.HEADER_ROW_COUNT,
-            },
-            'description': 'Source strings can only be edited in the source files.',
-            'warningOnly': True,
-        })
+        # # TODO Figure out how to be smarter about matching conditional formatting.
+        # # Remove all existing conditional formatting. :(
+        # if sheet and 'conditionalFormats' in sheet:
+        #     for _ in sheet['conditionalFormats']:
+        #         requests.append({
+        #             'deleteConditionalFormatRule': {
+        #                 'sheetId': sheet_id,
+        #                 'index': 0
+        #             }
+        #         })
+        #
+        # # Style header cells.
+        # requests.append({
+        #     'repeatCell': {
+        #         'fields': 'userEnteredFormat',
+        #         'range': {
+        #             'sheetId': sheet_id,
+        #             'startColumnIndex': 0,
+        #             'startRowIndex': 0,
+        #             'endRowIndex': self.HEADER_ROW_COUNT,
+        #         },
+        #         'cell': {
+        #             'userEnteredFormat': formats['header_cell'],
+        #         },
+        #     },
+        # })
+        #
+        # # Allow the translations and comments to wrap.
+        # requests.append({
+        #     'repeatCell': {
+        #         'fields': 'userEnteredFormat',
+        #         'range': {
+        #             'sheetId': sheet_id,
+        #             'startColumnIndex': 0,
+        #             'endColumnIndex': 3,
+        #             'startRowIndex': self.HEADER_ROW_COUNT,
+        #         },
+        #         'cell': {
+        #             'userEnteredFormat': formats['wrap'],
+        #         },
+        #     },
+        # })
+        #
+        # # Comment and source cells are muted in styling.
+        # requests.append({
+        #     'repeatCell': {
+        #         'fields': 'userEnteredFormat',
+        #         'range': {
+        #             'sheetId': sheet_id,
+        #             'startColumnIndex': 2,
+        #             'endColumnIndex': 4,
+        #             'startRowIndex': self.HEADER_ROW_COUNT,
+        #         },
+        #         'cell': {
+        #             'userEnteredFormat': formats['info_cell'],
+        #         },
+        #     },
+        # })
+        #
+        # # Highlight missing translations.
+        # requests.append({
+        #     'addConditionalFormatRule': {
+        #         'rule': {
+        #             'ranges': [{
+        #                 'sheetId': sheet_id,
+        #                 'startColumnIndex': 1,
+        #                 'endColumnIndex': 2,
+        #                 'startRowIndex': self.HEADER_ROW_COUNT,
+        #             }],
+        #             'booleanRule': {
+        #                 'condition': {'type': 'BLANK'},
+        #                 'format': formats['missing_cell']
+        #             }
+        #         },
+        #         'index': 0
+        #     }
+        # })
+        #
+        # # Protect the original values.
+        # requests += self._generate_style_protected_requests(sheet_id, sheet, {
+        #     'protectedRangeId': sheet_id + 1000001,  # Keep it predictble.
+        #     'range': {
+        #         'sheetId': sheet_id,
+        #         'startColumnIndex': 0,
+        #         'endColumnIndex': 1,
+        #         'startRowIndex': self.HEADER_ROW_COUNT,
+        #     },
+        #     'description': 'Original strings can only be edited in the source files.',
+        #     'warningOnly': True,
+        # })
+        #
+        # # Protect the comment values.
+        # requests += self._generate_style_protected_requests(sheet_id, sheet, {
+        #     'protectedRangeId': sheet_id + 1000002,  # Keep it predictble.
+        #     'range': {
+        #         'sheetId': sheet_id,
+        #         'startColumnIndex': 2,
+        #         'endColumnIndex': 3,
+        #         'startRowIndex': self.HEADER_ROW_COUNT,
+        #     },
+        #     'description': 'Comment strings can only be edited in the source files.',
+        #     'warningOnly': True,
+        # })
+        #
+        # # Protect the location values.
+        # requests += self._generate_style_protected_requests(sheet_id, sheet, {
+        #     'protectedRangeId': sheet_id + 1000003,  # Keep it predictble.
+        #     'range': {
+        #         'sheetId': sheet_id,
+        #         'startColumnIndex': 3,
+        #         'endColumnIndex': 4,
+        #         'startRowIndex': self.HEADER_ROW_COUNT,
+        #     },
+        #     'description': 'Source strings can only be edited in the source files.',
+        #     'warningOnly': True,
+        # })
 
         # Filter view for untranslated strings.
         requests += self._generate_filter_view_requests(sheet_id, sheet, {
@@ -804,6 +801,10 @@ class GoogleSheetsTranslator(base.Translator):
             sheet_id = sheet['properties']['sheetId']
             requests += self._generate_style_requests(
                 sheet_id, sheet=sheet, catalog=catalog)
+
+        if not requests:
+            print 'No requests generated. Skipping'
+            return
         self._perform_batch_update(spreadsheet_id, requests)
 
     def get_edit_url(self, doc):

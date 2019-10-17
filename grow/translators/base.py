@@ -253,17 +253,27 @@ class Translator(object):
         threads = []
         for i, (locale, stat) in enumerate(stats_to_download.iteritems()):
             catalog_for_meta = self.pod.catalogs.get(locale)
-            thread = threading.Thread(
-                target=self._update_meta, args=(stat, locale, catalog_for_meta))
-            threads.append(thread)
-            thread.start()
-            if i == 0:
-                thread.join()
-            self.pod.logger.info('Meta information updated ({}): {}'.format(
-                stat.lang, stat.url))
-        for i, thread in enumerate(threads):
-            if i > 0:
-                thread.join()
+            try:
+                self._update_meta(stat, locale, catalog_for_meta)
+                self.pod.logger.info('Meta information updated ({}): {}'.format(
+                    stat.lang, stat.url))
+            except Exception as exc:
+                print exc
+                print exc.content
+        # threads = []
+        # for i, (locale, stat) in enumerate(stats_to_download.iteritems()):
+        #     catalog_for_meta = self.pod.catalogs.get(locale)
+        #     thread = threading.Thread(
+        #         target=self._update_meta, args=(stat, locale, catalog_for_meta))
+        #     threads.append(thread)
+        #     thread.start()
+        #     if i == 0:
+        #         thread.join()
+        #     self.pod.logger.info('Meta information updated ({}): {}'.format(
+        #         stat.lang, stat.url))
+        # for i, thread in enumerate(threads):
+        #     if i > 0:
+        #         thread.join()
 
     def upload(self, locales=None, force=True, verbose=False, save_stats=True,
                prune=False):

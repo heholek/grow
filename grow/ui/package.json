@@ -16,7 +16,7 @@
     "gulp-autoprefixer": "^6.1.0",
     "gulp-rename": "~1.4.0",
     "gulp-sass": "^4.0.2",
-    "marked": "^0.6.2",
+    "marked": "^0.7.0",
     "pell": "^1.0.6",
     "superagent": "^5.0.5",
     "turndown": "^5.0.3",
